@@ -1,0 +1,7 @@
+---
+applications:
+- name: currency-conversion-service
+  memory: 256M
+  instances: 1
+  path: target/currency-conversion-service-0.0.1-SNAPSHOT.jar
+  domain: cfapps.io

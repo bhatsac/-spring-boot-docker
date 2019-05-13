@@ -1,0 +1,7 @@
+---
+applications:
+- name: netflix-eureka-naming-server-bhatsac
+  memory: 1G
+  instances: 1
+  path: target/netflix-eureka-naming-server-0.0.1-SNAPSHOT.jar
+  domain: cfapps.io

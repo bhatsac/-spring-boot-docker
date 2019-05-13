@@ -1,0 +1,17 @@
+version: "2"
+services:
+  currency-conversion-service: 
+    build: 
+      context: .
+      dockerfile: currency-conversion-service/DockerFile
+    ports: 
+      - "8100:8100"
+    links:
+      - "eureka:eureka"
+    depends_on:
+      - eureka  
+    container_name: currency-conversion-service
+    entrypoint: ["java","-jar","currency-conversion-service.jar"]
+    environment: 
+      - "EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8761/eureka"
+            

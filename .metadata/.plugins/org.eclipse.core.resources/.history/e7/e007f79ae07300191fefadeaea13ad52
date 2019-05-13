@@ -1,0 +1,50 @@
+[Build commands]
+	[currency-conversion-service]
+		docker build . -t currency-conversion-service
+	[netflix-zuul-api-gateway-server]
+		docker build . -t netflix-zuul-api-gateway-server
+	[]
+		docker build . -t currency-exchange-service
+	
+
+[Run commands]
+	[Eureka Server]
+		docker run --name eureka -p 8761:8761 -d eureka-server
+
+	[Currency Exchange service]
+		docker run --name currency-exchange-service --link eureka:eureka --rm -e EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka -p 8000:8000 -d currency-exchange-service
+
+	[currency-conversion-service]
+				docker run --name currency-conversion-service --link eureka:eureka --rm -e EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka -p 8100:8100 -d currency-conversion-service
+	
+	[netflix-zuul-api-gateway-server]
+				docker run --name netflix-zuul-api-gateway-server --link eureka:eureka --link currency-conversion-service:currency-conversion-service --link currency-exchange-service:currency-exchange-service --rm -e EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka -p 8765:8765 -d netflix-zuul-api-gateway-server
+
+
+
+
+http://localhost:8761/
+http://localhost:8100/currency-converter/feign/from/USD/to/INR/quantity/10
+http://localhost:8000/currenct-exchange/from/USD/to/INR
+http://localhost:8765/currency-conversion-service/currency-converter/feign/from/USD/to/INR/quantity/10
+
+
+
+docker run --name eureka -p 8762:8761 -d eureka-server
+docker run --name currency-exchange-service --link eureka:eureka --rm -e EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka -p 8001:8000 -d currency-exchange-service
+docker run --name currency-conversion-service --link eureka:eureka --rm -e EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka -p 8200:8100 -d currency-conversion-service
+docker run --name netflix-zuul-api-gateway-server --link eureka:eureka --link currency-conversion-service:currency-conversion-service --link currency-exchange-service:currency-exchange-service --rm -e EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka -p 8766:8765 -d netflix-zuul-api-gateway-server
+
+
+
+http://localhost:8762/
+http://localhost:8200/currency-converter/feign/from/USD/to/INR/quantity/10
+http://localhost:8000/currenct-exchange/from/USD/to/INR
+http://localhost:8766/currency-conversion-service/currency-converter/feign/from/USD/to/INR/quantity/10
+
+
+
+
+[Links]
+	https://github.com/tanerdiler/spring-boot-microservice-eureka-zuul-docker/blob/master/docker-compose.yml
+	https://stackify.com/guide-docker-java/

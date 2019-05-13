@@ -1,0 +1,123 @@
+[Build commands]
+	[currency-conversion-service]
+		docker build . -t currency-conversion-service
+	[netflix-zuul-api-gateway-server]
+		docker build . -t netflix-zuul-api-gateway-server
+	[]
+		docker build . -t currency-exchange-service
+	
+
+[Run commands]
+	[Eureka Server]
+		docker run --name eureka -p 8761:8761 -d eureka-server
+
+	[Currency Exchange service]
+		docker run --name currency-exchange-service --link eureka:eureka --rm -e EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka -p 8000:8000 -d currency-exchange-service
+
+	[currency-conversion-service]
+				docker run --name currency-conversion-service --link eureka:eureka --rm -e EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka -p 8100:8100 -d currency-conversion-service
+	
+	[netflix-zuul-api-gateway-server]
+				docker run --name netflix-zuul-api-gateway-server --link eureka:eureka --link currency-conversion-service:currency-conversion-service --link currency-exchange-service:currency-exchange-service --rm -e EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka -p 8765:8765 -d netflix-zuul-api-gateway-server
+
+
+
+
+http://localhost:8761/
+http://localhost:8100/currency-converter/feign/from/USD/to/INR/quantity/10
+http://localhost:8000/currenct-exchange/from/USD/to/INR
+http://localhost:8765/currency-conversion-service/currency-converter/feign/from/USD/to/INR/quantity/10
+
+
+
+docker run --name eureka -p 8762:8761 -d eureka-server
+docker run --name currency-exchange-service --link eureka:eureka --rm -e EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka -p 8001:8000 -d currency-exchange-service
+docker run --name currency-conversion-service --link eureka:eureka --rm -e EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka -p 8200:8100 -d currency-conversion-service
+docker run --name netflix-zuul-api-gateway-server --link eureka:eureka --link currency-conversion-service:currency-conversion-service --link currency-exchange-service:currency-exchange-service --rm -e EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka -p 8766:8765 -d netflix-zuul-api-gateway-server
+
+
+
+http://localhost:8762/
+http://localhost:8200/currency-converter/feign/from/USD/to/INR/quantity/10
+http://localhost:8000/currenct-exchange/from/USD/to/INR
+http://localhost:8766/currency-conversion-service/currency-converter/feign/from/USD/to/INR/quantity/10
+
+
+[command to enter the container]
+	docker exec -it eureka(<conatiner name>) sh
+
+[Links]
+	https://github.com/tanerdiler/spring-boot-microservice-eureka-zuul-docker/blob/master/docker-compose.yml
+	https://stackify.com/guide-docker-java/
+	
+
+[backup]
+  currency-exchange-service: 
+    build: 
+      context: .
+      dockerfile: currency-exchange-service/DockerFile
+    ports: 
+      - "8000:8000"
+    links:
+      - "eureka:eureka"
+    depends_on:
+      - eureka   
+    container_name: currency-exchange-service 
+    entrypoint: ["java","-jar","currency-exchange-service.jar"]
+    environment: 
+      - "EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8761/eureka"                          
+  eureka: 
+    build: 
+      context: .
+      dockerfile: netflix-eureka-naming-server/DockerFile
+    ports:
+      - "8761:8761"
+    container_name: eureka
+    entrypoint: ["java","-jar","eureka-server.jar"]    
+  netflix-zuul-api-gateway-server: 
+    build: 
+      context: .
+      dockerfile: netflix-zuul-api-gateway-server/DockerFile
+    ports: 
+      - "8765:8765"
+    links: 
+      - "eureka:eureka"
+    depends_on:
+      - eureka    
+    container_name: netflix-zuul-api-gateway-server
+    entrypoint: ["java","-jar","netflix-zuul-api-gateway-server.jar"]
+    environment: 
+      - "EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8761/eureka"	
+
+
+[backup 2]
+
+  currency-exchange-service: 
+    build: 
+      context: ..\currency-exchange-service
+      dockerfile: DockerFile
+    ports: 
+      - "8000:8000"
+    links:
+      - "eureka:eureka"
+    depends_on:
+      - eureka   
+    container_name: currency-exchange-service 
+    entrypoint: ["java","-jar","currency-exchange-service.jar"]
+    environment: 
+      - "EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8761/eureka"                          
+   
+  netflix-zuul-api-gateway-server: 
+    build: 
+      context: ../netflix-zuul-api-gateway-server
+      dockerfile: DockerFile
+    ports: 
+      - "8765:8765"
+    links: 
+      - "eureka:eureka"
+    depends_on:
+      - eureka    
+    container_name: netflix-zuul-api-gateway-server
+    entrypoint: ["java","-jar","netflix-zuul-api-gateway-server.jar"]
+    environment: 
+      - "EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8761/eureka"	

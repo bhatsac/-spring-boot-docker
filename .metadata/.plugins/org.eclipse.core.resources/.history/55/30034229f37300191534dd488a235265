@@ -1,0 +1,21 @@
+version: "2"
+services:
+  currency-conversion-service: 
+    build: 
+      context: ..\currency-conversion-service
+      dockerfile: Dockerfile
+    ports: 
+      - "8100:8100"
+    container_name: currency-conversion-service
+    entrypoint: ["java","-jar","currency-conversion-service.jar"]
+    environment: 
+      - "EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8761/eureka"
+  eureka: 
+    build: 
+      context: ../netflix-eureka-naming-server
+      dockerfile: DockerFile
+    ports:
+      - "8761:8761"
+    container_name: eureka
+    entrypoint: ["java","-jar","eureka-server.jar"] 
+          

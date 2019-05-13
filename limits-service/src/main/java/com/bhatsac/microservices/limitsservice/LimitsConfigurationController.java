@@ -1,0 +1,25 @@
+package com.bhatsac.microservices.limitsservice;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.bhatsac.microservices.limitsservice.bean.LimitConfiguration;
+
+@RestController
+public class LimitsConfigurationController {
+	//@Autowired
+	//Configuration configuration;
+	
+	/*@GetMapping("/limits")
+	public LimitConfiguration retriveLimitsFromConfiguration(){
+		
+		return new LimitConfiguration(configuration.getMaximum(),configuration.getMinimum());
+	}*/
+	
+	@GetMapping("/isup")
+	public String isup(){
+		
+		return "This is awesome, iam secure now!";
+	}
+}
